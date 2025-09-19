@@ -1,38 +1,53 @@
+// ./src/components/Message.tsx
 'use client';
 
 import React from 'react';
-import { Message } from '@/types';
+import { MessageType } from '@/types/message';
 
-interface MessageBubbleProps {
-  message: Message;
+interface MessageProps {
+  message: MessageType;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
-  const isUser = message.role === 'user';
-  
+const Message: React.FC<MessageProps> = ({ message }) => {
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    
+    if (diff < 60000) return '방금';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}분 전`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전`;
+    
+    return date.toLocaleTimeString('ko-KR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div
-        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-lg ${
-          isUser
-            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-            : 'bg-white text-gray-800'
-        }`}
-      >
-        <p className="text-sm leading-relaxed">{message.content}</p>
-        <p
-          className={`text-xs mt-1 ${
-            isUser ? 'text-purple-100' : 'text-gray-400'
-          }`}
-        >
-          {new Date(message.timestamp).toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </p>
+    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+      <div className={`message-bubble ${message.role === 'user' ? 'user-message' : 'bot-message'}`}>
+        {/* 메시지 내용 */}
+        <div 
+          className="prose prose-sm max-w-none dark:prose-invert"
+          dangerouslySetInnerHTML={{ __html: message.content.replace(/\n/g, '<br>') }}
+        />
+        
+        {/* 타임스탬프 */}
+        <div className={`mt-2 text-xs opacity-70 flex items-center gap-1 ${
+          message.role === 'user' ? 'justify-end' : 'justify-start'
+        }`}>
+          <span>{formatTime(message.timestamp)}</span>
+          {message.role === 'assistant' && (
+            <span className="text-purple-500">🤖</span>
+          )}
+          {message.role === 'user' && (
+            <span className="text-pink-400">👤</span>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default MessageBubble;
+export default Message;
