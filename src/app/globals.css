@@ -1,40 +1,111 @@
+/* ./src/app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* 모바일 앱 스타일 커스텀 */
 @layer base {
   html {
-    scroll-behavior: smooth;
+    font-size: 16px;
   }
+  
   body {
-    @apply bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100;
+    @apply bg-gray-50 dark:bg-gray-900;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }
 
 @layer components {
-  .chat-container {
-    @apply min-h-screen flex items-center justify-center p-4;
-  }
+  /* 메시지 버블 */
   .message-bubble {
-    @apply max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-lg;
+    @apply max-w-[80%] rounded-3xl px-4 py-3 mb-3 shadow-sm;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  .user-message {
+    @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white ml-auto;
+    border-bottom-right-radius: 4px;
+  }
+  
+  .bot-message {
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700;
+    border-bottom-left-radius: 4px;
+  }
+  
+  /* 타이핑 인디케이터 */
+  .typing-indicator {
+    @apply flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700;
+  }
+  
+  .typing-dots {
+    @apply flex gap-1;
+  }
+  
+  .typing-dot {
+    @apply w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full;
+    animation: typing 1.4s infinite ease-in-out;
+  }
+  
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  
+  /* 앱 헤더 */
+  .app-header {
+    @apply bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg;
+  }
+  
+  /* 입력 영역 */
+  .input-container {
+    @apply bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700;
+    backdrop-filter: blur(10px);
+  }
+  
+  /* 애니메이션 */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes typing {
+    0%, 60%, 100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    30% {
+      transform: translateY(-10px);
+      opacity: 1;
+    }
+  }
+  
+  /* 스크롤바 커스텀 */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
   }
 }
 
-/* 스크롤바 커스터마이징 */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.5);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.7);
+/* 모바일 반응형 */
+@layer utilities {
+  @responsive {
+    .mobile-app {
+      @media (max-width: 640px) {
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+      }
+    }
+  }
 }
