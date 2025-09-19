@@ -1,8 +1,13 @@
-// ./src/components/Message.tsx
 'use client';
 
 import React from 'react';
-import { MessageType } from '@/types/message';
+
+interface MessageType {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
 
 interface MessageProps {
   message: MessageType;
