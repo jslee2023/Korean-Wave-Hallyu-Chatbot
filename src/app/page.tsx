@@ -1,19 +1,13 @@
-// ./src/app/page.tsx
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import UserInput from '@/components/UserInput';
-import Message from '@/components/Message';
+import Message from '@/components/Message'; // ✅ 이제 이 import가 작동할 것임
 
-interface MessageType {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
-}
+// ✅ MessageType 인터페이스 제거 (Message.tsx에 정의됨)
 
 export default function Home() {
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<any[]>([]); // ✅ 임시로 any 사용
   const [isLoading, setIsLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -34,7 +28,7 @@ export default function Home() {
         setMessages([
           {
             id: 'welcome',
-            role: 'assistant',
+            role: 'assistant' as const,
             content: `🎉 **한류 챗봇에 오신 것을 환영합니다!** 🌟\n\n안녕하세요! 저는 한류 전문 AI 어시스턴트 **한류봇**입니다. 🎵📺 K-팝, K-드라마, K-뷰티, 한국 여행 등 한류의 모든 것에 대해 이야기 나눌 수 있어요!\n\n**어떤 한류 주제가 궁금하시나요?**\n• 🎤 BTS, BLACKPINK 최신 소식\n• 📺 지금 볼만한 드라마 추천\n• 💄 K-뷰티 루틴 가이드\n• 🏝️ 서울 여행 코스\n\n지금 바로 물어보세요! 😊`,
             timestamp: Date.now(),
           },
@@ -50,9 +44,9 @@ export default function Home() {
     if (!message.trim() || isLoading) return;
 
     // 사용자 메시지 추가
-    const userMessage: MessageType = {
+    const userMessage = {
       id: `user-${Date.now()}`,
-      role: 'user',
+      role: 'user' as const,
       content: message,
       timestamp: Date.now(),
     };
@@ -87,9 +81,9 @@ export default function Home() {
       }
 
       // AI 응답 메시지 추가
-      const botMessage: MessageType = {
+      const botMessage = {
         id: `bot-${Date.now()}`,
-        role: 'assistant',
+        role: 'assistant' as const,
         content: data.content,
         timestamp: data.timestamp,
       };
@@ -98,9 +92,9 @@ export default function Home() {
     } catch (error) {
       console.error('채팅 오류:', error);
       
-      const errorMessage: MessageType = {
+      const errorMessage = {
         id: `error-${Date.now()}`,
-        role: 'assistant',
+        role: 'assistant' as const,
         content: `😅 죄송합니다! 메시지 전송 중 오류가 발생했어요. **오류**: ${error instanceof Error ? error.message : '알 수 없는 오류'}\n\n잠시 후 다시 시도해주세요! 🙏\n\n혹시 문제가 계속되면 새로고침 해보세요! 🔄`,
         timestamp: Date.now(),
       };
