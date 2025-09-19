@@ -18,10 +18,14 @@ const UserInput: React.FC<UserInputProps> = ({ onSendMessage, isLoading }) => {
     }
   };
 
+  // ✅ 수정: any 타입 제거, 직접 로직 처리
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e as any);
+      if (input.trim() && !isLoading) {
+        onSendMessage(input.trim());
+        setInput('');
+      }
     }
   };
 
