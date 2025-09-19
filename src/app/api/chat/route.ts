@@ -91,22 +91,26 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // ✅ 수정: any[] → ChatMessage[]
+    // ✅ 수정: 사용자 메시지만 히스토리에 포함
     const chatHistory: ChatMessage[] = [];
     
     if (history && Array.isArray(history)) {
-      // ✅ 수정: any → HistoryMessage
-      history.forEach((msg: HistoryMessage) => {
-        // ✅ 수정: msg: any → msg: HistoryMessage
-        if (msg.role && msg.content) {
+      console.log('📜 히스토리 처리 중...');
+      // ✅ 핵심 수정: user 메시지만 추가, assistant 메시지는 제외
+      history.forEach((msg: HistoryMessage, index: number) => {
+        if (msg.role === 'user' && msg.content) {
+          console.log(`👤 사용자 메시지 ${index + 1}:`, msg.content.substring(0, 30) + '...');
           chatHistory.push({
-            role: msg.role === 'user' ? 'user' : 'model',
+            role: 'user',
             parts: [{ text: msg.content }],
           });
         }
       });
+      
+      console.log(`📊 히스토리 요약 - 총 ${history.length}개 중 사용자 메시지 ${chatHistory.length}개`);
     }
 
+    // ✅ 현재 메시지 추가 (항상 user 역할)
     chatHistory.push({
       role: 'user',
       parts: [{ text: message }],
@@ -114,8 +118,14 @@ export async function POST(request: NextRequest) {
 
     console.log('💬 Gemini로 전송 중... 히스토리 길이:', chatHistory.length);
 
+    // ✅ 히스토리 검증: 첫 메시지가 user인지 확인
+    if (chatHistory.length > 0 && chatHistory[0].role !== 'user') {
+      console.warn('⚠️ 첫 메시지가 user가 아님. 빈 히스토리로 재시작.');
+      chatHistory.length = 0; // 히스토리 초기화
+    }
+
     const chat = model.startChat({
-      history: chatHistory.length > 1 ? chatHistory.slice(0, -1) : [],
+      history: chatHistory.length > 1 ? chatHistory.slice(0, -1) : [], // 마지막 메시지는 sendMessage로 처리
     });
 
     const result = await chat.sendMessage(message);
@@ -131,17 +141,20 @@ export async function POST(request: NextRequest) {
       content = content.substring(0, 2000) + '\n\n... (응답이 길어 일부만 표시됩니다)';
     }
 
+    // ✅ 한류 관련 키워드 강조
     content = content
       .replace(/BTS|방탄소년단/g, '🎤 **$&**')
       .replace(/BLACKPINK|블랙핑크/g, '💖 **$&**')
       .replace(/뉴진스|NewJeans/g, '🌟 **$&**')
       .replace(/김치|김치찌개/g, '🍲 **$&**')
       .replace(/K-팝|케이팝/g, '🎵 **$&**')
-      .replace(/K-드라마|케이드라마/g, '📺 **$&**');
+      .replace(/K-드라마|케이드라마/g, '📺 **$&**')
+      .replace(/TWICE|트와이스/g, '💎 **$&**')
+      .replace(/SEVENTEEN|세븐틴/g, '💎 **$&**')
+      .replace(/EXO|엑소/g, '🌟 **$&**');
 
     console.log('✅ 응답 생성 완료:', content.length, '자');
 
-    // ✅ 타입 안전한 응답 객체
     const responseData: ChatResponse = {
       content,
       timestamp: Date.now(),
@@ -162,7 +175,12 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof Error) {
       const errorMsg = error.message.toLowerCase();
-      if (errorMsg.includes('403') || errorMsg.includes('permission')) {
+      
+      // ✅ 역할 관련 에러 처리 추가
+      if (errorMsg.includes('first content should be with role') || errorMsg.includes('role')) {
+        errorMessage = '💬 대화 컨텍스트를 재설정하고 있어요. 새로 시작해보세요! 🌟';
+        statusCode = 400;
+      } else if (errorMsg.includes('403') || errorMsg.includes('permission')) {
         errorMessage = '🔑 API 키 인증 오류입니다. 환경 변수를 확인해주세요.';
         statusCode = 403;
       } else if (errorMsg.includes('429') || errorMsg.includes('quota')) {
