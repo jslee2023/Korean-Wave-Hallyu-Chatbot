@@ -36,9 +36,35 @@ const systemInstruction = `당신은 "한류봇"입니다. 한국 문화와 한�
 한류봇: "🎵 BTS의 최신 앨범은 2025년 3분기 예정이에요! HYBE에서 'Map of the Soul: Echoes' 후속작으로 준비 중이라고 해요. 
 특히 RM의 솔로 프로젝트도 기대되고 있죠! 🎤 어떤 곡 스타일이 궁금하세요?"`;
 
+// ✅ TypeScript 인터페이스 정의
+interface ChatMessage {
+  role: 'user' | 'model';
+  parts: Array<{ text: string }>;
+}
+
+interface HistoryMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface ChatRequest {
+  message: string;
+  history?: HistoryMessage[];
+}
+
+interface ChatResponse {
+  content: string;
+  timestamp: number;
+  tokens?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    totalTokenCount?: number;
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { message, history } = await request.json();
+    const { message, history }: ChatRequest = await request.json();
 
     console.log('📨 받은 메시지:', message?.substring(0, 50) + '...');
     console.log('🔑 API 키 설정됨:', !!process.env.GEMINI_API_KEY);
@@ -65,9 +91,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const chatHistory: any[] = [];
+    // ✅ 수정: any[] → ChatMessage[]
+    const chatHistory: ChatMessage[] = [];
+    
     if (history && Array.isArray(history)) {
-      history.forEach((msg: any) => {
+      // ✅ 수정: any → HistoryMessage
+      history.forEach((msg: HistoryMessage) => {
+        // ✅ 수정: msg: any → msg: HistoryMessage
         if (msg.role && msg.content) {
           chatHistory.push({
             role: msg.role === 'user' ? 'user' : 'model',
@@ -111,11 +141,18 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ 응답 생성 완료:', content.length, '자');
 
-    return NextResponse.json({
+    // ✅ 타입 안전한 응답 객체
+    const responseData: ChatResponse = {
       content,
       timestamp: Date.now(),
-      tokens: response.usageMetadata,
-    });
+      tokens: response.usageMetadata ? {
+        promptTokenCount: response.usageMetadata.promptTokenCount,
+        candidatesTokenCount: response.usageMetadata.candidatesTokenCount,
+        totalTokenCount: response.usageMetadata.totalTokenCount,
+      } : undefined,
+    };
+
+    return NextResponse.json(responseData);
 
   } catch (error) {
     console.error('❌ API 오류:', error);
