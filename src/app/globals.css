@@ -1,40 +1,38 @@
-/* ./src/app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 모바일 앱 스타일 커스텀 */
 @layer base {
   html {
     font-size: 16px;
   }
   
   body {
-    @apply bg-white dark:bg-gray-900; /* ✅ gray-50 → white로 변경 */
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
-  /* 메시지 버블 */
   .message-bubble {
-    @apply max-w-[80%] rounded-3xl px-4 py-3 mb-3 shadow-sm;
-    animation: slideIn 0.3s ease-out;
+    @apply max-w-[80%] rounded-3xl px-4 py-3 mb-3 shadow-sm break-words;
   }
   
   .user-message {
-    @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white ml-auto;
-    border-bottom-right-radius: 4px;
+    @apply bg-purple-500 text-white self-end rounded-l-lg;
   }
   
   .bot-message {
-    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700;
-    border-bottom-left-radius: 4px;
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white border rounded-r-lg;
   }
   
-  /* 타이핑 인디케이터 */
   .typing-indicator {
-    @apply flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700;
+    @apply flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-2xl;
   }
   
   .typing-dots {
@@ -42,25 +40,23 @@
   }
   
   .typing-dot {
-    @apply w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full;
+    @apply w-2 h-2 bg-gray-400 rounded-full;
     animation: typing 1.4s infinite ease-in-out;
   }
   
   .typing-dot:nth-child(2) { animation-delay: 0.2s; }
   .typing-dot:nth-child(3) { animation-delay: 0.4s; }
   
-  /* 앱 헤더 */
   .app-header {
-    @apply bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg;
+    @apply bg-gradient-to-r from-purple-600 to-pink-600 text-white;
   }
   
-  /* 입력 영역 */
   .input-container {
     @apply bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700;
-    backdrop-filter: blur(10px);
   }
-  
-  /* 애니메이션 */
+}
+
+@layer utilities {
   @keyframes slideIn {
     from {
       opacity: 0;
@@ -80,32 +76,6 @@
     30% {
       transform: translateY(-10px);
       opacity: 1;
-    }
-  }
-  
-  /* 스크롤바 커스텀 */
-  ::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
-  }
-}
-
-/* 모바일 반응형 */
-@layer utilities {
-  @responsive {
-    .mobile-app {
-      @media (max-width: 640px) {
-        padding: 0;
-        margin: 0;
-        border-radius: 0;
-      }
     }
   }
 }
